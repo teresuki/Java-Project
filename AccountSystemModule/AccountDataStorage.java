@@ -7,6 +7,7 @@ package com.mycompany.accountsystem;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -29,20 +31,33 @@ public class AccountDataStorage {
     void importFromSource(String fileName) throws FileNotFoundException, IOException {
         m_fileName = fileName;
 
-        BufferedReader reader = new BufferedReader(new FileReader(m_fileName));
-        String line = null;
-        Scanner sc = null;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(m_fileName));
 
-        while ((line = reader.readLine()) != null) {
-            sc = new Scanner(line);
-            sc.useDelimiter(",");
+            String line = null;
+            Scanner sc = null;
 
-            var thisAccount = new Account(
-                    sc.next(),
-                    Base64.getDecoder().decode(sc.next()),
-                    Base64.getDecoder().decode(sc.next()));
+            while ((line = reader.readLine()) != null) {
+                sc = new Scanner(line);
+                sc.useDelimiter(",");
 
-            m_accountHashMap.put(thisAccount.getUsername(), thisAccount);
+                try {
+                    var thisAccount = new Account(
+                            sc.next(),
+                            Base64.getDecoder().decode(sc.next()),
+                            Base64.getDecoder().decode(sc.next()));
+
+                    m_accountHashMap.put(thisAccount.getUsername(), thisAccount);
+                } catch (NoSuchElementException e) {
+                    System.out.println("Entry corrupted or incomplete, skipping Entry.");
+                    System.err.println("Corrupted Entry: " + line);
+                    continue;
+                }
+
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("File \"" + m_fileName + "\" does not exist, creating a new Account Data file.");
+            File newFile = new File(m_fileName);
         }
 
     }

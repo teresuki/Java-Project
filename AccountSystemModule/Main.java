@@ -55,7 +55,7 @@ public class Main {
         AccountDataStorage ads = new AccountDataStorage();
         ads.importFromSource(accountFileName);
         if (loginOption == LoginOption.SIGN_UP) {
-            System.out.println("SIGN_UP chose.");
+            System.out.println("SIGN_UP chosen.");
             //try catch here?
             System.out.println("Enter your username:");
             username = scanner.nextLine();
@@ -74,7 +74,7 @@ public class Main {
             ads.insertAccount(newAccount);
 
         } else if (loginOption == LoginOption.SIGN_IN) {
-            System.out.println("SIGN_IN chose.");
+            System.out.println("SIGN_IN chosen.");
 
             //try catch here?
             System.out.println("Enter your username:");
