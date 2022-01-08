@@ -1,11 +1,3 @@
-DROP TABLE doctorhealthdept;
-DROP TABLE appointment;
-DROP TABLE doctor;
-DROP TABLE userhealthdept;
-DROP TABLE healthdept;
-DROP TABLE customer;
-DROP TABLE insurance;
-
 CREATE TABLE customer (accountId varchar(20) PRIMARY KEY,  
 					  username VARCHAR(10) not null UNIQUE,  
 					  hashpwd VARCHAR(20),
