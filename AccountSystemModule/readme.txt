@@ -1,2 +1,2 @@
 User can create new account or login into existing account
-.csv file contain username, hashed password and its salt.
+database is hosted on Amazon Web Service Relational Database Service (AWS-RDS)
