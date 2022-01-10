@@ -113,6 +113,16 @@ public class Account {
         return this.username;
     }
 
+    byte[] getHashedPassword()
+    {
+        return this.hashedPassword;
+    }
+    
+    byte[] getSalt()
+    {
+        return this.salt;
+    }
+    
     String getHashedPasswordString() {
         return Base64.getEncoder().encodeToString(this.hashedPassword);
     }
@@ -126,34 +136,18 @@ public class Account {
     }
 
     String getFirstName() {
-        if(this.firstName.isEmpty())
-        {
-            this.firstName = null;
-        }
         return this.firstName;
     }
 
     String getLastName() {
-        if(this.lastName.isEmpty())
-        {
-            this.lastName = null;
-        }
         return this.lastName;
     }
 
     String getAddress() {
-        if(this.address.isEmpty())
-        {
-            this.address = null;
-        }
         return this.address;
     }
 
     String getInsuranceID() {
-        if(this.insuranceID.isEmpty())
-        {
-            this.insuranceID = null;
-        }
         return this.insuranceID;
     }
 
@@ -201,19 +195,27 @@ public class Account {
         this.email = email;
     }
 
-    void setFirstName(String firstname) {
-        this.firstName = firstname;
+    void setFirstName(String firstName) {
+        if(firstName != null && firstName.isEmpty())
+            firstName = null;
+        this.firstName = firstName;
     }
 
     void setLastName(String lastName) {
+        if(lastName != null && lastName.isEmpty())
+            lastName = null;
         this.lastName = lastName;
     }
 
     void setAddress(String address) {
+        if(address != null && address.isEmpty())
+            address = null;
         this.address = address;
     }
 
     void setInsuranceID(String insuranceID) {
+        if(insuranceID != null && insuranceID.isEmpty())
+            insuranceID = null;
         this.insuranceID = insuranceID;
     }
 

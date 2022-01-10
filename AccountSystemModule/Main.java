@@ -23,7 +23,11 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Password:");
         String DBPassword = scanner.nextLine();
-        EHealthDatabase db = new EHealthDatabase(DBPassword);
+        EHealthDatabase ehdb = new EHealthDatabase(DBPassword);
+        
+        ehdb.importAndPrintDBUser();
+        
+        ehdb.loginOptionStart();
     }
 
 }

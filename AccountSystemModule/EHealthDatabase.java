@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.UUID;
@@ -25,35 +27,51 @@ public class EHealthDatabase {
         QUIT
     }
 
-    private static final String HOSTNAME = "ehealth-db.cqajckw84dii.us-east-1.rds.amazonaws.com";
-    private static final String PORT = "3306";
-    private static final String DATABASENAME = "ehealth"; // Or Schema Name
+    private static String HOSTNAME = "ehealth-db.cqajckw84dii.us-east-1.rds.amazonaws.com";
+    private static String PORT = "3306";
+    private static String DATABASENAME = "ehealth"; // Or Schema Name
 
     private static final String URL = "jdbc:mysql://" + HOSTNAME + ":" + PORT + "/ " + DATABASENAME;
-    private static final String DBUSERNAME = "admin";
-    //private static final String DBPASSWORD = "";
+    private static String DBUSERNAME = "admin";
+    private static String DBPASSWORD = "";
     private Connection connection;
 
     public EHealthDatabase(String DBPASSWORD) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+        this(DBPASSWORD, "jdbc:mysql://" + HOSTNAME + ":" + PORT + "/ " + DATABASENAME, DBUSERNAME);
+    }
 
-        //Load JDBC Driver
+    public EHealthDatabase(
+            String DBPASSWORD,
+            String URL,
+            String DBUSERNAME) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+
+        loadJDBCDriver();
+
+        this.DBPASSWORD = DBPASSWORD;
+        connectToDatabase();
+
+    }
+
+    void loadJDBCDriver() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             System.out.println("JDBC Driver loaded!");
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException("Cannot find the driver in the classpath!", e);
         }
+    }
 
-        //Connect to Database
+    void connectToDatabase() {
         try {
             connection = DriverManager.getConnection(URL, DBUSERNAME, DBPASSWORD);
             System.out.println("Database connected! Welcome " + DBUSERNAME);
         } catch (SQLException e) {
             System.out.println("Cannot connect to the database!");
             System.out.println(e.toString());
-            return;
         }
+    }
 
+    void loginOptionStart() throws NoSuchAlgorithmException, SQLException, InvalidKeySpecException {
         LoginOption loginOption;
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter \"SIGN_UP\" to create new account");
@@ -64,8 +82,9 @@ public class EHealthDatabase {
             try {
                 loginOption = LoginOption.valueOf(sc.nextLine());
                 break;
-            } catch (Exception IllegalArgumentException) {
+            } catch (Exception e) {
                 System.out.println("Invalid Option, please try again.");
+                System.out.println(e.toString());
             }
         }
 
@@ -83,91 +102,9 @@ public class EHealthDatabase {
                 }
             }
         }
-
     }
 
-    final boolean isUUIDExist(String newUUID) throws SQLException {
-        Statement st = connection.createStatement();
-        ResultSet rs = st.executeQuery("SELECT accountID FROM user");
-        while (rs.next()) {
-            String importedUUID = rs.getString(1);
-            if (newUUID.equals(importedUUID)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    final boolean isUsernameExist(String newUsername) throws SQLException {
-        Statement st = connection.createStatement();
-        ResultSet rs = st.executeQuery("SELECT username FROM user");
-        while (rs.next()) {
-            String importedUsername = rs.getString(1);
-            if (newUsername.equals(importedUsername)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    final boolean isEmailExist(String newEMail) throws SQLException {
-        Statement st = connection.createStatement();
-        ResultSet rs = st.executeQuery("SELECT email FROM user");
-        while (rs.next()) {
-            String importedEMail = rs.getString(1);
-            if (newEMail.equals(importedEMail)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    final byte[] getSaltFromDBUsername(String DBUsername) throws SQLException {
-        String query = "SELECT salt FROM user WHERE username= ?";
-        PreparedStatement  pst = connection.prepareStatement(query);
-        pst.setString(1, DBUsername);
-        ResultSet rs = pst.executeQuery();
-        rs.next();
-        String importedSaltString = rs.getString(1);
-        byte[] ans = importedSaltString.getBytes();
-        return ans;
-    }
-    
-    final boolean isHashedPasswordCorrect(String DBUsername, byte[] hashedPassword) throws SQLException
-    {
-        String query = "SELECT hashedPassword FROM user WHERE username= ?";
-        PreparedStatement  pst = connection.prepareStatement(query);
-        pst.setString(1, DBUsername);
-        ResultSet rs = pst.executeQuery();
-        rs.next();
-        String importedHashedPassword = rs.getString(1);
-        byte[] ans = importedHashedPassword.getBytes();
-        return (hashedPassword.equals(importedHashedPassword));
-    }
-
-    final void importDBUser() throws SQLException {
-        //Import Data From Database:
-        System.out.println("Importing Data from user");
-        Statement stm = connection.createStatement();
-        ResultSet rs = stm.executeQuery("SELECT * FROM user");
-        ResultSetMetaData rsmd = rs.getMetaData();
-        int columnNum = rsmd.getColumnCount();
-
-        for (int i = 1; i <= columnNum; ++i) {
-            System.out.printf("%-22s", rsmd.getColumnName(i));
-        }
-        System.out.println("");
-
-        while (rs.next()) {
-            //Column name
-            for (int i = 1; i <= columnNum; ++i) {
-                System.out.printf("%-22s", rs.getString(i));
-            }
-            System.out.println("");
-        }
-    }
-
-    final void signUp() throws NoSuchAlgorithmException, InvalidKeySpecException, SQLException {
+    void signUp() throws NoSuchAlgorithmException, InvalidKeySpecException, SQLException {
         Account newAccount = new Account();
 
         UUID accountID = UUID.randomUUID(); //Generates random UUID
@@ -278,11 +215,12 @@ public class EHealthDatabase {
 
     }
 
-    final void signIn() throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
-        Scanner scanner = new Scanner(System.in);
+    void signIn() throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 
-        System.out.println("Enter your username:");
-        String username = scanner.nextLine();
+        Scanner scanner = new Scanner(System.in);//IO
+
+        System.out.println("Enter your username:");//IO
+        String username = scanner.nextLine();//IO
 
         //Check if username exist in Database:
         if (isUsernameExist(username) == false) {
@@ -291,31 +229,35 @@ public class EHealthDatabase {
             return;
         }
 
-        System.out.println("Enter your password:");
-        String password = scanner.nextLine();
+        System.out.println("Enter your password:");//IO
+        String password = scanner.nextLine();//IO
 
         //Get salt from Database:
         byte[] salt = getSaltFromDBUsername(username);
-        byte[] hashedPassword = generateHashedPassword(password, salt);
         
-        if(isHashedPasswordCorrect(username, hashedPassword))
-        {
+        System.out.println(Base64.getEncoder().encodeToString(salt));
+        
+        byte[] hashedPassword = generateHashedPassword(password, salt);
+
+        System.out.println(Base64.getEncoder().encodeToString(hashedPassword));
+        
+        if (isHashedPasswordCorrect(username, hashedPassword)) {
+            System.out.println("Login successfully!");
+        } else {
             System.out.println("Password is incorrect");
-        }
-        else
-        {
-            System.out.println("Login successfully!");           
         }
     }
 
-    final void insertDBUser(Account newAccount) throws SQLException {
+    void insertDBUser(Account newAccount) throws SQLException {
         try {
             PreparedStatement stmt = connection.prepareStatement("INSERT INTO user" + " (accountID, username, hashedPassword, salt, email, firstName, lastName, address, insuranceID, insuranceType, gender, dateOfBirth)"
                     + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             stmt.setString(1, newAccount.getAccountIDString());
             stmt.setString(2, newAccount.getUsername());
-            stmt.setString(3, newAccount.getHashedPasswordString());
-            stmt.setString(4, newAccount.getSaltString());
+            //stmt.setString(3, newAccount.getHashedPasswordString());
+            stmt.setBytes(3, newAccount.getHashedPassword());
+            //stmt.setString(4, newAccount.getSaltString());
+            stmt.setBytes(4, newAccount.getSalt());
             stmt.setString(5, newAccount.getEmail());
             stmt.setString(6, newAccount.getFirstName());
             stmt.setString(7, newAccount.getLastName());
@@ -332,7 +274,73 @@ public class EHealthDatabase {
             System.out.println("Insert Failed!");
             System.out.println(e.toString());
         }
+    }
+    
+    void importAndPrintDBUser() throws SQLException {
+        //Import Data From Database:
+        System.out.println("Importing Data from user");
+        Statement stm = connection.createStatement();
+        ResultSet rs = stm.executeQuery("SELECT * FROM user");
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columnNum = rsmd.getColumnCount();
 
+        for (int i = 1; i <= columnNum; ++i) {
+            System.out.printf("%-22s", rsmd.getColumnName(i));
+        }
+        System.out.println("");
+
+        while (rs.next()) {
+            //Column name
+            for (int i = 1; i <= columnNum; ++i) {
+                System.out.printf("%-22s", rs.getString(i));
+            }
+            System.out.println("");
+        }
+    }
+    
+    boolean isUUIDExist(String newUUID) throws SQLException {
+        String query = "SELECT accountID FROM user WHERE accountID = ?";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setString(1, newUUID);
+        ResultSet rs = pst.executeQuery();
+        return rs.next();
+    }
+
+    boolean isUsernameExist(String newUsername) throws SQLException {
+        String query = "SELECT username FROM user WHERE username = ?";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setString(1, newUsername);
+        ResultSet rs = pst.executeQuery();
+        return rs.next();
+    }
+
+    boolean isEmailExist(String newEMail) throws SQLException {
+        String query = "SELECT email FROM user WHERE email = ?";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setString(1, newEMail);
+        ResultSet rs = pst.executeQuery();
+        return rs.next();
+    }
+
+    byte[] getSaltFromDBUsername(String DBUsername) throws SQLException {
+        String query = "SELECT salt FROM user WHERE username= ?";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setString(1, DBUsername);
+        ResultSet rs = pst.executeQuery();
+        rs.next();
+        byte[] importedSalt = rs.getBytes(1);
+        return importedSalt;
+    }
+
+    boolean isHashedPasswordCorrect(String DBUsername, byte[] hashedPassword) throws SQLException {
+        String query = "SELECT hashedPassword FROM user WHERE username= ?";
+        PreparedStatement pst = connection.prepareStatement(query);
+        pst.setString(1, DBUsername);
+        ResultSet rs = pst.executeQuery();
+        rs.next();
+        byte[] importedHashedPassword = rs.getBytes(1);
+        return Arrays.equals(hashedPassword, importedHashedPassword);
+        //return hashedPassword.equals(importedHashedPassword);
     }
 
     byte[] generateSalt() {
@@ -359,5 +367,11 @@ public class EHealthDatabase {
             result += alphabet.charAt(randNum);
         }
         return result;
+    }
+
+    void clearUserTable() throws SQLException {
+        String query = "DELETE FROM user";
+        Statement st = connection.createStatement();
+        st.execute(query);
     }
 }
