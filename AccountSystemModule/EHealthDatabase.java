@@ -113,17 +113,19 @@ public class EHealthDatabase {
         }
         newAccount.setAccountID(accountID);
 
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);//IO
 
+        //Username
+        //loop until valid input is achieved.
         for (boolean goodInput = false;;) {
-            System.out.println("Enter your username:");
-            newAccount.setUsername(scanner.nextLine());
-            goodInput = newAccount.isUsernameValid(newAccount.getUsername());
+            System.out.println("Enter your username:");//IO
+            newAccount.setUsername(scanner.nextLine());//IO
+            goodInput = newAccount.isUsernameValid(newAccount.getUsername());// Check for validity of username, if invalid try again
             if (goodInput == false) {
                 System.out.println("Username is Invalid, please try again.");
                 continue;
             }
-            goodInput = !isUsernameExist(newAccount.getUsername()); //Username must NOT already existed
+            goodInput = !isUsernameExist(newAccount.getUsername()); //Username must NOT already existed in Database, if already taken try again
             if (goodInput == false) {
                 System.out.println("Username \"" + newAccount.getUsername() + "\" is taken, please try another username.");
                 continue;
@@ -131,10 +133,11 @@ public class EHealthDatabase {
             break;
         }
 
+        //Password & Salt
         String password;
         do {
-            System.out.println("Enter your password:");
-            password = scanner.nextLine();
+            System.out.println("Enter your password:");//IO
+            password = scanner.nextLine();//IO
         } while (!newAccount.isPasswordValid(password));
 
         byte[] salt = generateSalt(); // Salt
@@ -143,9 +146,11 @@ public class EHealthDatabase {
         byte[] hashedPassword = generateHashedPassword(password, salt); // hashedPassword
         newAccount.setHashedPassword(hashedPassword);
 
+        //Email
+        //Loop until valid input is achived
         for (boolean goodInput = false;;) {
-            System.out.println("Enter your email:");
-            newAccount.setEmail(scanner.nextLine());
+            System.out.println("Enter your email:");//IO
+            newAccount.setEmail(scanner.nextLine());//IO
             goodInput = newAccount.isEmailValid(newAccount.getEmail());
             if (goodInput == false) {
                 System.out.println("Email is invalid, please try again.");
@@ -159,18 +164,24 @@ public class EHealthDatabase {
             break;
         }
 
-        System.out.println("Enter your first name:");
-        newAccount.setFirstName(scanner.nextLine());
+        //Firstname
+        System.out.println("Enter your first name:");//IO
+        newAccount.setFirstName(scanner.nextLine());//IO
 
-        System.out.println("Enter your last name:");
-        newAccount.setLastName(scanner.nextLine());
+        //Lastname
+        System.out.println("Enter your last name:");//IO
+        newAccount.setLastName(scanner.nextLine());//IO
 
-        System.out.println("Enter your address:");
-        newAccount.setAddress(scanner.nextLine());
+        //Address
+        System.out.println("Enter your address:");//IO
+        newAccount.setAddress(scanner.nextLine());//IO
 
-        System.out.println("Enter your Insurance ID:");
-        newAccount.setInsuranceID(scanner.nextLine());
+        //Insurance ID
+        System.out.println("Enter your Insurance ID:");//IO
+        newAccount.setInsuranceID(scanner.nextLine());//IO
 
+        //Insurance Type (Public/Private)
+        //Selection, If empty/invalid set to NULL
         System.out.println("Enter your Insurance Type (Public/Private):");
         try {
             String temp = scanner.nextLine();
@@ -184,6 +195,8 @@ public class EHealthDatabase {
             //return;
         }
 
+        //Gender (M/F/O) Male, Female, Other
+        //Selection, If empty/invalid set to NULL
         System.out.println("Enter your Gender(M/F/O):");
         try {
             String temp = scanner.nextLine();
@@ -197,6 +210,8 @@ public class EHealthDatabase {
             //return;
         }
 
+        //Date of Birth, format: yyyy-mm-dd, Example: 2002-23-07
+        //If invalid set to NULL
         System.out.println("Enter your date of birth (yyyy-mm-dd):");
         try {
             java.sql.Date temp = java.sql.Date.valueOf(scanner.nextLine());
