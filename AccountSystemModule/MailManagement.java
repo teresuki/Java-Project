@@ -143,8 +143,8 @@ public class MailManagement {
 
         //String host = "pop.gmail.com";// change accordingly
         //String mailStoreType = "pop3";
-        String username = "chautruongvinhhoang04@gmail.com";// change accordingly
-        String password = "Uyen_3012";// change accordingly
+        String username = "";// change accordingly
+        String password = "";// change accordingly
 
         MailManagement user1 = new MailManagement(username, password);
         user1.sendMail("chautruongvinhhoang04@gmail.com","This field is for mail subject","This is a content");
